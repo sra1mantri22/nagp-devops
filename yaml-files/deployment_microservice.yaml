@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: data-service
+  labels:
+    app: data-service
+spec:
+  template:
+    metadata:
+      labels:
+        app: data-service
+        type: microservice
+    spec:
+      containers:
+        - name: data-service
+          image: sra1mantri/data-service:v3
+          ports:
+          - containerPort: 8080
+          envFrom:
+          - configMapRef:
+                name: db-config
+          env:
+          - name: DB_PASSWORD
+            valueFrom:
+              secretKeyRef:
+                name: mysql-secret
+                key: DB_PASSWORD
+  replicas: 4
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxSurge: 1
+      maxUnavailable: 1
+  selector:
+    matchLabels:
+      app: data-service
+      type: microservice
